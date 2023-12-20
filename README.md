@@ -9,7 +9,13 @@ This repository comprises the datasets and source code developed during the work
 
 ## Datasets
 
-The project included the acquisition of two datasets during the execution of eight exercises:
+The project included the acquisition of two datasets during the execution of eight exercises typically used in musculoskeletal telerehabilitation (and conventional) sessions:
+| Exercises | Exercises |
+| ------------- | ------------- |
+| 1. Shoulder Flexion/Extension  | 5. Hip Abduction/Adduction |
+| 2. Shoulder Abduction/Adduction | 6. Squat  |
+| 3. Elbow Flexion/Extension  | 7. March |
+| 4. Shoulder Press | 8. Seated Knee Flexion/Extension |
 
 (1) The **ground truth dataset** (data_pos_qualisys) was collected using Qualisys, a gold-standard motion capture system. Six markers were placed in anatomical regions on the right side of the participant's body close to the shoulder, elbow, wrist, hip, knee, and ankle. Qualisys measured the 3D position of the six markers.
 
@@ -19,15 +25,6 @@ The data is available at [datasets drive](https://ulisboa-my.sharepoint.com/:f:/
 
 Files are named according to the following identification criteria: `xy.txt`, where `x` is the subject ID and `y` is the exercise number. For example, `13.txt` is the acquisition of `subject 1` performing `exercise 3` (i.e. `elbow flexion`).
 
-## Exercises
-
-Eight exercises typically used in musculoskeletal telerehabilitation (and conventional) sessions were selected:
-| Exercises | Exercises |
-| ------------- | ------------- |
-| 1. Shoulder Flexion/Extension  | 5. Hip Abduction/Adduction |
-| 2. Shoulder Abduction/Adduction | 6. Squat  |
-| 3. Elbow Flexion/Extension  | 7. March |
-| 4. Shoulder Press | 8. Seated Knee Flexion/Extension |
 
 ## License
 
