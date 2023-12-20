@@ -16,7 +16,7 @@ The project included the acquisition of two datasets (ground truth dataset and p
 (2) The **predicted dataset** (data_pos_mediapipe) was estimated by MediaPipe Pose, a state-of-the-art 3D HPE algorithm. The 3D position of twelve human joints (shoulders, elbows, wrists, hips, knees, and ankles) was estimated by the algorithm from monocular 2D videos.
 
 | Exercises | Exercises |
-| ------------- | ------------- |
+| --- | --- |
 | 1. Shoulder Flexion/Extension  | 5. Hip Abduction/Adduction |
 | 2. Shoulder Abduction/Adduction | 6. Squat  |
 | 3. Elbow Flexion/Extension  | 7. March |
