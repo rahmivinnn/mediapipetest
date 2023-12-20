@@ -22,7 +22,7 @@ The project included the acquisition of two datasets (ground truth dataset and p
 | 3. Elbow Flexion/Extension  | 7. March |
 | 4. Shoulder Press | 8. Seated Knee Flexion/Extension |
 
-The data is available at [datasets drive](https://ulisboa-my.sharepoint.com/:f:/g/personal/ist192800_tecnico_ulisboa_pt/ErvBBiLzAKNNra0SGisPDFQBOHurjrFOq8FQXKAOcaGZzw?e=Vi7HCn). [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10408307.svg)](https://doi.org/10.5281/zenodo.10408307)
+The data is available at [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10408307.svg)](https://doi.org/10.5281/zenodo.10408307).
 
 Files are named according to the following identification criteria: `xy.txt`, where `x` is the subject ID and `y` is the exercise number. For example, `13.txt` is the acquisition of `subject 1` performing `exercise 3` (i.e. `elbow flexion`).
 
