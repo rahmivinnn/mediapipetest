@@ -10,16 +10,17 @@ This repository comprises the datasets and source code developed during the work
 ## Datasets
 
 The project included the acquisition of two datasets (ground truth dataset and predicted dataset) during the execution of eight exercises typically used in musculoskeletal telerehabilitation (and conventional) sessions:
+
+(1) The **ground truth dataset** (data_pos_qualisys) was collected using Qualisys, a gold-standard motion capture system. Six markers were placed in anatomical regions on the right side of the participant's body close to the shoulder, elbow, wrist, hip, knee, and ankle. Qualisys measured the 3D position of the six markers.
+
+(2) The **predicted dataset** (data_pos_mediapipe) was estimated by MediaPipe Pose, a state-of-the-art 3D HPE algorithm. The 3D position of twelve human joints (shoulders, elbows, wrists, hips, knees, and ankles) was estimated by the algorithm from monocular 2D videos.
+
 | Exercises | Exercises |
 | ------------- | ------------- |
 | 1. Shoulder Flexion/Extension  | 5. Hip Abduction/Adduction |
 | 2. Shoulder Abduction/Adduction | 6. Squat  |
 | 3. Elbow Flexion/Extension  | 7. March |
 | 4. Shoulder Press | 8. Seated Knee Flexion/Extension |
-
-(1) The **ground truth dataset** (data_pos_qualisys) was collected using Qualisys, a gold-standard motion capture system. Six markers were placed in anatomical regions on the right side of the participant's body close to the shoulder, elbow, wrist, hip, knee, and ankle. Qualisys measured the 3D position of the six markers.
-
-(2) The **predicted dataset** (data_pos_mediapipe) was estimated by MediaPipe Pose, a state-of-the-art 3D HPE algorithm. The 3D position of twelve human joints (shoulders, elbows, wrists, hips, knees, and ankles) was estimated by the algorithm from monocular 2D videos.
 
 The data is available at [datasets drive](https://ulisboa-my.sharepoint.com/:f:/g/personal/ist192800_tecnico_ulisboa_pt/ErvBBiLzAKNNra0SGisPDFQBOHurjrFOq8FQXKAOcaGZzw?e=Vi7HCn).
 
