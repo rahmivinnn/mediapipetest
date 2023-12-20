@@ -26,7 +26,7 @@ This project is released under BSD 3-clause License - see the [LICENSE](LICENSE)
 @Misc{,
   author = {Carolina Clemente and Gon{\c{c}}alo Chambel and Diogo C. F. Silva and Ant{\'o}nio Mesquita Montes and Joana F. Pinto and Hugo Pl{\'a}cido da Silva},
   title = {{Feasibility of 3D Body Tracking from Monocular 2D Video Feeds in Musculoskeletal Telerehabilitation}},
-  year = {2023--},
+  year = {2023},
   url = "https://github.com/carolinaclemente00/3D-HPE-MediaPipe-Pose.git",
   note = {[Online; accessed <today>]}
 }
