@@ -31,9 +31,11 @@ Files are named according to the following identification criteria: `xy.txt`, wh
 
 This project is released under BSD 3-clause License - see the [LICENSE](LICENSE) file for details
 
+</div>
+
 ## Citation
 Please use the following if you need to cite this repository:
-* Clemente C, Chambel G, Silva DCF, Montes AM, Pinto JF,  Pinto, Silva HP, Feasibility of 3D Body Tracking from Monocular 2D Video Feeds in Musculoskeletal Telerehabilitation, 2023, [https://github.com/carolinaclemente00/3D-HPE-MediaPipe-Pose](https://github.com/carolinaclemente00/3D-HPE-MediaPipe-Pose) [Online; accessed <year>-<month>-<day>].
+* Clemente C, Chambel G, Silva DCF, Montes AM, Pinto JF,  Pinto, Silva HP, **Feasibility of 3D Body Tracking from Monocular 2D Video Feeds in Musculoskeletal Telerehabilitation**, 2023, [https://github.com/carolinaclemente00/3D-HPE-MediaPipe-Pose](https://github.com/carolinaclemente00/3D-HPE-MediaPipe-Pose) [Online; accessed <year>-<month>-<day>].
 ```
 @Misc{,
   author = {Carolina Clemente and Gon{\c{c}}alo Chambel and Diogo C. F. Silva and Ant{\'o}nio Mesquita Montes and Joana F. Pinto and Hugo Pl{\'a}cido da Silva},
@@ -43,8 +45,11 @@ Please use the following if you need to cite this repository:
   note = {[Online; accessed <today>]}
 }
 ```
+
+<div align="justify"> 
+  
 ## Disclamer
 This program is distributed in the hope it will be useful and provided to you "as is", but WITHOUT ANY WARRANTY, without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. This program is NOT intended for medical diagnosis. We expressly disclaim any liability whatsoever for any direct, indirect, consequential, incidental or special damages, including, without limitation, lost revenues, lost profits, losses resulting from business interruption or loss of data, regardless of the form of action or legal theory under which the liability may be asserted, even if advised of the possibility of such damages.
 
-</div>
 
+</div>
