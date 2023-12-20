@@ -19,6 +19,16 @@ The data is available at [datasets drive](https://ulisboa-my.sharepoint.com/:f:/
 
 Files are named according to the following identification criteria: `xy.txt`, where `x` is the subject ID and `y` is the exercise number. For example, `13.txt` is the acquisition of `subject 1` performing `exercise 3` (i.e. `elbow flexion`).
 
+## Exercises
+
+Eight exercises typically used in musculoskeletal telerehabilitation (and conventional) sessions were selected:
+| Exercises | Exercises |
+| ------------- | ------------- |
+| 1. Shoulder Flexion/Extension  | 5. Hip Abduction/Adduction |
+| 2. Shoulder Abduction/Adduction | 6. Squat  |
+| 3. Elbow Flexion/Extension  | 7. March |
+| 4. Shoulder Press | 8. Seated Knee Flexion/Extension |
+
 ## License
 
 This project is released under BSD 3-clause License - see the [LICENSE](LICENSE) file for details
