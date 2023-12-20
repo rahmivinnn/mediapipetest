@@ -17,7 +17,7 @@ The data is available at [datasets drive](https://ulisboa-my.sharepoint.com/:f:/
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+This project is licensed under BSD 3-clause License - see the [LICENSE](LICENSE) file for details
 
 ## Citation
 
