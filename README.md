@@ -22,6 +22,8 @@ Files are named according to the following identification criteria: xy.txt, wher
 This project is released under BSD 3-clause License - see the [LICENSE](LICENSE) file for details
 
 ## Citation
+Please use the following if you need to cite this repository:
+* Clemente C, Chambel G, Silva DCF, Montes AM, Pinto JF,  Pinto, Silva HP, Feasibility of 3D Body Tracking from Monocular 2D Video Feeds in Musculoskeletal Telerehabilitation, 2023, https://github.com/PIA-Group/BioSPPy/ [Online; accessed <year>-<month>-<day>].
 ```
 @Misc{,
   author = {Carolina Clemente and Gon{\c{c}}alo Chambel and Diogo C. F. Silva and Ant{\'o}nio Mesquita Montes and Joana F. Pinto and Hugo Pl{\'a}cido da Silva},
