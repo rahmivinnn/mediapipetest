@@ -9,7 +9,7 @@ This repository comprises the datasets and source code developed during the work
 
 ## Datasets
 
-The project included the acquisition of two datasets during the execution of eight exercises typically used in musculoskeletal telerehabilitation (and conventional) sessions:
+The project included the acquisition of two datasets (ground truth dataset and predicted dataset) during the execution of eight exercises typically used in musculoskeletal telerehabilitation (and conventional) sessions:
 | Exercises | Exercises |
 | ------------- | ------------- |
 | 1. Shoulder Flexion/Extension  | 5. Hip Abduction/Adduction |
