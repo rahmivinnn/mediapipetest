@@ -1,12 +1,8 @@
 <div align="justify"> 
 
-# Towards Musculoskeletal Rehabilitation Based on Body Tracking from 2D Video Feeds
+# Feasibility of 3D Body Tracking from Monocular 2D Video Feeds in Musculoskeletal Telerehabilitation
 
-This work comprised the evaluation of 
-
-Here, one can find a detailed description of the experimental study and the data acquisition process designed to evaluate the performance of MediaPipe Pose on a wide range of exercises typically performed in musculoskeletal physiotherapy sessions by comparing it to a gold-standard motion tracking system, namely the Qualisys Motion Capture system. Data was used to investigate the performance of MediaPipe Pose on the prediction of the Range of Motion and the prediction of the 3D position of 12 joints. 
-For more information, consult this Master’s Thesis and this Publication.
-
+This repository comprises the datasets and source code developed during the work described in *Feasibility of 3D Body Tracking from Monocular 2D Video Feeds in Musculoskeletal Telerehabilitation*.
 
 **Abstract:** Musculoskeletal conditions affect millions of people globally, however, conventional treatments pose challenges concerning price, accessibility, and convenience. Many telerehabilitation solutions offer an engaging alternative but rely on complex hardware for body tracking. This work explores the feasibility of models for 3D Human Pose Estimation (HPE) from monocular 2D videos (MediaPipe Pose) in a physiotherapy context, by comparing its performance to ground truth measurements. MediaPipe Pose was investigated in eight exercises typically performed in musculoskeletal physiotherapy sessions, where the Range of Motion (ROM) of the human joints was the evaluated parameter. This model showed the best performance for shoulder abduction, shoulder press, elbow flexion, and squat exercises (MAPE ranging between 14.9% and 25.0%, Pearson’s coefficient ranging between 0.963 and 0.996, and cosine similarity ranging between 0.987 and 0.999). Some exercises (e.g. seated knee extension and shoulder flexion) posed challenges due to unusual poses, occlusions and depth ambiguities, possibly related to a lack of training data.  This study demonstrates the potential of HPE from monocular 2D videos, as a markerless, affordable and accessible solution for musculoskeletal telerehabilitation approaches. Future work should focus on exploring variations of the 3D HPE models trained on physiotherapy-related datasets, such as the Fit3D dataset, and post-preprocessing techniques to enhance the model's performance.
 
