@@ -1,6 +1,6 @@
 <div align="justify"> 
 
-# Feasibility of 3D Body Tracking from Monocular 2D Video Feeds in Musculoskeletal Telerehabilitation
+# Towards Musculoskeletal Rehabilitation Based on \\ Body Tracking from 2D Video Feeds
 
 This repository comprises the datasets and source code developed during the work described in *Feasibility of 3D Body Tracking from Monocular 2D Video Feeds in Musculoskeletal Telerehabilitation*.
 
