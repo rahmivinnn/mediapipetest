@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Human Pose Estimation - MediaPipe</title>
+    <!-- Load MediaPipe libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        header, main, footer {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            margin: 0.5rem;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Video Section */
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 480px;
+            margin-bottom: 1rem;
+            background-color: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        #webcam, #output-canvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #output-canvas {
+            z-index: 10;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Results Section */
+        .results-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .data-visualization {
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .video-container {
+                height: 360px;
+            }
+        }
+
+        footer {
+            text-align: center;
+            color: #7f8c8d;
+            margin-top: 2rem;
+        }
+
+        footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Landmarks */
+        .landmark-grid-container {
+            height: 480px;
+            width: 100%;
+            position: relative;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        /* Angle Display */
+        .angle-display {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .angle-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        /* Exercise Selection */
+        .exercise-selection {
+            margin-bottom: 1rem;
+        }
+
+        select {
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        /* Status message */
+        .status-message {
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>3D Human Pose Estimation with MediaPipe</h1>
+        <p>Feasibility of 3D Body Tracking from Monocular 2D Video Feeds in Musculoskeletal Telerehabilitation</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>Live Demo</h2>
+            <div class="exercise-selection">
+                <label for="exercise-select">Select Exercise:</label>
+                <select id="exercise-select">
+                    <option value="1">1. Shoulder Flexion/Extension</option>
+                    <option value="2">2. Shoulder Abduction/Adduction</option>
+                    <option value="3">3. Elbow Flexion/Extension</option>
+                    <option value="4">4. Shoulder Press</option>
+                    <option value="5">5. Hip Abduction/Adduction</option>
+                    <option value="6">6. Squat</option>
+                    <option value="7">7. March</option>
+                    <option value="8">8. Seated Knee Flexion/Extension</option>
+                </select>
+            </div>
+            <div class="video-container">
+                <video id="webcam" autoplay playsinline></video>
+                <canvas id="output-canvas"></canvas>
+            </div>
+            <div id="status-message" class="status-message status-info">
+                Click "Start Webcam" to begin
+            </div>
+            <div class="angle-display">
+                <p>Current Angle:</p>
+                <div class="angle-value" id="angle-value">0°</div>
+            </div>
+            <div class="controls">
+                <button id="start-webcam">Start Webcam</button>
+                <button id="stop-webcam" disabled>Stop Webcam</button>
+                <button id="toggle-landmarks">Show 3D View</button>
+                <button id="start-recording" disabled>Start Recording</button>
+                <button id="stop-recording" disabled>Stop Recording</button>
+                <button id="download-recording" disabled>Download Recording</button>
+            </div>
+        </section>
+
+        <section id="landmark-section" class="hidden">
+            <h2>3D Landmarks</h2>
+            <div class="landmark-grid-container" id="landmark-grid-container"></div>
+        </section>
+
+        <section id="chart-section">
+            <h2>Angle Tracking</h2>
+            <div class="data-visualization">
+                <canvas id="angle-chart"></canvas>
+            </div>
+            <div class="controls">
+                <button id="clear-chart">Clear Chart</button>
+                <button id="download-data">Download Data</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2023 - <a href="https://github.com/carolinaclemente00/3D-HPE-MediaPipe-Pose" target="_blank">GitHub Repository</a></p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const webcamVideo = document.getElementById('webcam');
+            const outputCanvas = document.getElementById('output-canvas');
+            const startWebcamBtn = document.getElementById('start-webcam');
+            const stopWebcamBtn = document.getElementById('stop-webcam');
+            const toggleLandmarksBtn = document.getElementById('toggle-landmarks');
+            const landmarkSection = document.getElementById('landmark-section');
+            const landmarkContainer = document.getElementById('landmark-grid-container');
+            const exerciseSelect = document.getElementById('exercise-select');
+            const angleValue = document.getElementById('angle-value');
+            const startRecordingBtn = document.getElementById('start-recording');
+            const stopRecordingBtn = document.getElementById('stop-recording');
+            const downloadRecordingBtn = document.getElementById('download-recording');
+            const clearChartBtn = document.getElementById('clear-chart');
+            const downloadDataBtn = document.getElementById('download-data');
+            const angleChart = document.getElementById('angle-chart');
+            const statusMessage = document.getElementById('status-message');
+
+            // Variables
+            let camera = null;
+            let pose = null;
+            let poseResults = null;
+            let landmarkGrid = null;
+            let mediaRecorder = null;
+            let recordedChunks = [];
+            let isRecording = false;
+            let chart = null;
+            let angleData = [];
+            let timeData = [];
+            let startTime = null;
+            let videoStream = null;
+
+            // Initialize Chart.js
+            function initChart() {
+                const ctx = angleChart.getContext('2d');
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Joint Angle (degrees)',
+                            data: [],
+                            borderColor: '#3498db',
+                            tension: 0.1,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Time (seconds)'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Angle (degrees)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Initialize MediaPipe Pose
+            function initPose() {
+                updateStatus('Loading pose model...', 'info');
+                
+                pose = new Pose({
+                    locateFile: (file) => {
+                        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+                    }
+                });
+
+                pose.setOptions({
+                    modelComplexity: 1,
+                    smoothLandmarks: true,
+                    enableSegmentation: false,
+                    smoothSegmentation: true,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+
+                pose.onResults(onResults);
+                
+                updateStatus('Pose model loaded', 'success');
+            }
+
+            // Update status message
+            function updateStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = `status-message status-${type}`;
+            }
+
+            // Initialize 3D Landmark Grid
+            function initLandmarkGrid() {
+                try {
+                    landmarkGrid = new LandmarkGrid(landmarkContainer, {
+                        connectionColor: 0xCCCCCC,
+                        landmarkColor: 0x999999,
+                        rigidBodyColor: 0x257AFE,
+                        range: 2,
+                        fitToGrid: true,
+                        labelSuffix: 'm',
+                        landmarkSize: 2,
+                        numCellsPerAxis: 4,
+                        showHidden: true,
+                        centered: true
+                    });
+                } catch (error) {
+                    console.error('Error initializing landmark grid:', error);
+                    updateStatus('Error initializing 3D view', 'error');
+                }
+            }
+
+            // Process pose results
+            function onResults(results) {
+                // Draw pose landmarks on canvas
+                const canvasCtx = outputCanvas.getContext('2d');
+                canvasCtx.save();
+                canvasCtx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+                
+                // Draw the webcam image
+                canvasCtx.drawImage(results.image, 0, 0, outputCanvas.width, outputCanvas.height);
+                
+                // Draw the pose landmarks
+                if (results.poseLandmarks) {
+                    drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {color: '#00FF00', lineWidth: 2});
+                    drawLandmarks(canvasCtx, results.poseLandmarks, {color: '#FF0000', lineWidth: 1, radius: 3});
+                    
+                    updateStatus('Pose detected', 'success');
+                } else {
+                    updateStatus('No pose detected - make sure your full body is visible', 'info');
+                }
+                
+                canvasCtx.restore();
+
+                // Update 3D landmark grid
+                if (landmarkGrid && results.poseWorldLandmarks) {
+                    try {
+                        landmarkGrid.updateLandmarks(results.poseWorldLandmarks, POSE_CONNECTIONS, [
+                            {list: results.poseWorldLandmarks, type: 'pose'}
+                        ]);
+                    } catch (error) {
+                        console.error('Error updating landmarks:', error);
+                    }
+                } else if (landmarkGrid) {
+                    landmarkGrid.updateLandmarks([]);
+                }
+
+                // Calculate and display angle based on selected exercise
+                if (results.poseLandmarks) {
+                    const exerciseType = parseInt(exerciseSelect.value);
+                    const angle = calculateAngle(results.poseLandmarks, exerciseType);
+                    angleValue.textContent = `${angle.toFixed(1)}°`;
+
+                    // Update chart if recording
+                    if (isRecording) {
+                        const currentTime = (Date.now() - startTime) / 1000;
+                        timeData.push(currentTime);
+                        angleData.push(angle);
+                        
+                        chart.data.labels = timeData;
+                        chart.data.datasets[0].data = angleData;
+                        chart.update();
+                    }
+                }
+
+                poseResults = results;
+            }
+
+            // Calculate angle based on exercise type
+            function calculateAngle(landmarks, exerciseType) {
+                let angle = 0;
+                
+                switch(exerciseType) {
+                    case 1: // Shoulder Flexion/Extension
+                        angle = calculateShoulderFlexionAngle(landmarks);
+                        break;
+                    case 2: // Shoulder Abduction/Adduction
+                        angle = calculateShoulderAbductionAngle(landmarks);
+                        break;
+                    case 3: // Elbow Flexion/Extension
+                        angle = calculateElbowFlexionAngle(landmarks);
+                        break;
+                    case 4: // Shoulder Press
+                        angle = calculateShoulderPressAngle(landmarks);
+                        break;
+                    case 5: // Hip Abduction/Adduction
+                        angle = calculateHipAbductionAngle(landmarks);
+                        break;
+                    case 6: // Squat
+                        angle = calculateSquatAngle(landmarks);
+                        break;
+                    case 7: // March
+                        angle = calculateMarchAngle(landmarks);
+                        break;
+                    case 8: // Seated Knee Flexion/Extension
+                        angle = calculateKneeFlexionAngle(landmarks);
+                        break;
+                    default:
+                        angle = 0;
+                }
+                
+                return angle;
+            }
+
+            // Angle calculation functions for different exercises
+            function calculateShoulderFlexionAngle(landmarks) {
+                const shoulder = landmarks[11]; // Right shoulder
+                const elbow = landmarks[13]; // Right elbow
+                const hip = landmarks[23]; // Right hip
+                
+                return calculateAngleBetweenPoints(hip, shoulder, elbow);
+            }
+
+            function calculateShoulderAbductionAngle(landmarks) {
+                const shoulder = landmarks[11]; // Right shoulder
+                const elbow = landmarks[13]; // Right elbow
+                const hip = landmarks[23]; // Right hip
+                
+                return calculateAngleBetweenPoints(hip, shoulder, elbow);
+            }
+
+            function calculateElbowFlexionAngle(landmarks) {
+                const shoulder = landmarks[11]; // Right shoulder
+                const elbow = landmarks[13]; // Right elbow
+                const wrist = landmarks[15]; // Right wrist
+                
+                return calculateAngleBetweenPoints(shoulder, elbow, wrist);
+            }
+
+            function calculateShoulderPressAngle(landmarks) {
+                const shoulder = landmarks[11]; // Right shoulder
+                const elbow = landmarks[13]; // Right elbow
+                const wrist = landmarks[15]; // Right wrist
+                
+                return calculateAngleBetweenPoints(shoulder, elbow, wrist);
+            }
+
+            function calculateHipAbductionAngle(landmarks) {
+                const hip = landmarks[23]; // Right hip
+                const knee = landmarks[25]; // Right knee
+                const ankle = landmarks[27]; // Right ankle
+                
+                return calculateAngleBetweenPoints(hip, knee, ankle);
+            }
+
+            function calculateSquatAngle(landmarks) {
+                const hip = landmarks[23]; // Right hip
+                const knee = landmarks[25]; // Right knee
+                const ankle = landmarks[27]; // Right ankle
+                
+                return calculateAngleBetweenPoints(hip, knee, ankle);
+            }
+
+            function calculateMarchAngle(landmarks) {
+                const hip = landmarks[23]; // Right hip
+                const knee = landmarks[25]; // Right knee
+                const ankle = landmarks[27]; // Right ankle
+                
+                return calculateAngleBetweenPoints(hip, knee, ankle);
+            }
+
+            function calculateKneeFlexionAngle(landmarks) {
+                const hip = landmarks[23]; // Right hip
+                const knee = landmarks[25]; // Right knee
+                const ankle = landmarks[27]; // Right ankle
+                
+                return calculateAngleBetweenPoints(hip, knee, ankle);
+            }
+
+            // Calculate angle between three points
+            function calculateAngleBetweenPoints(pointA, pointB, pointC) {
+                const vectorAB = {
+                    x: pointB.x - pointA.x,
+                    y: pointB.y - pointA.y,
+                    z: pointB.z - pointA.z
+                };
+                
+                const vectorBC = {
+                    x: pointC.x - pointB.x,
+                    y: pointC.y - pointB.y,
+                    z: pointC.z - pointB.z
+                };
+                
+                // Calculate dot product
+                const dotProduct = vectorAB.x * vectorBC.x + vectorAB.y * vectorBC.y + vectorAB.z * vectorBC.z;
+                
+                // Calculate magnitudes
+                const magnitudeAB = Math.sqrt(vectorAB.x * vectorAB.x + vectorAB.y * vectorAB.y + vectorAB.z * vectorAB.z);
+                const magnitudeBC = Math.sqrt(vectorBC.x * vectorBC.x + vectorBC.y * vectorBC.y + vectorBC.z * vectorBC.z);
+                
+                // Calculate angle in radians
+                const angleRadians = Math.acos(dotProduct / (magnitudeAB * magnitudeBC));
+                
+                // Convert to degrees
+                return angleRadians * (180 / Math.PI);
+            }
+
+            // Start webcam
+            startWebcamBtn.addEventListener('click', async () => {
+                try {
+                    updateStatus('Requesting camera access...', 'info');
+                    
+                    // Request camera access directly first
+                    videoStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        }
+                    });
+                    
+                    webcamVideo.srcObject = videoStream;
+                    
+                    // Wait for video to be ready
+                    webcamVideo.onloadedmetadata = () => {
+                        // Initialize MediaPipe components
+                        initPose();
+                        initLandmarkGrid();
+                        
+                        // Set up camera with MediaPipe
+                        camera = new Camera(webcamVideo, {
+                            onFrame: async () => {
+                                if (pose) {
+                                    try {
+                                        await pose.send({ image: webcamVideo });
+                                    } catch (error) {
+                                        console.error('Error sending frame to pose:', error);
+                                    }
+                                }
+                            }
+                        });
+                        
+                        // Start camera
+                        camera.start()
+                            .then(() => {
+                                updateStatus('Camera started successfully', 'success');
+                                
+                                // Update button states
+                                startWebcamBtn.disabled = true;
+                                stopWebcamBtn.disabled = false;
+                                startRecordingBtn.disabled = false;
+                                
+                                // Set canvas dimensions
+                                outputCanvas.width = webcamVideo.videoWidth || 640;
+                                outputCanvas.height = webcamVideo.videoHeight || 480;
+                            })
+                            .catch(error => {
+                                console.error('Error starting camera:', error);
+                                updateStatus('Error starting camera: ' + error.message, 'error');
+                            });
+                    };
+                    
+                    webcamVideo.onerror = (error) => {
+                        console.error('Video error:', error);
+                        updateStatus('Video error: ' + error.message, 'error');
+                    };
+                    
+                } catch (error) {
+                    console.error('Error accessing webcam:', error);
+                    updateStatus('Could not access webcam. Please check permissions: ' + error.message, 'error');
+                }
+            });
+
+            // Stop webcam
+            stopWebcamBtn.addEventListener('click', () => {
+                if (camera) {
+                    camera.stop();
+                }
+                
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => track.stop());
+                    webcamVideo.srcObject = null;
+                }
+                
+                // Clear canvas
+                const ctx = outputCanvas.getContext('2d');
+                ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+                
+                // Update button states
+                startWebcamBtn.disabled = false;
+                stopWebcamBtn.disabled = true;
+                startRecordingBtn.disabled = true;
+                stopRecordingBtn.disabled = true;
+                
+                // Stop recording if active
+                if (isRecording) {
+                    stopRecording();
+                }
+                
+                updateStatus('Camera stopped', 'info');
+            });
+
+            // Toggle 3D landmarks view
+            toggleLandmarksBtn.addEventListener('click', () => {
+                if (landmarkSection.classList.contains('hidden')) {
+                    landmarkSection.classList.remove('hidden');
+                    toggleLandmarksBtn.textContent = 'Hide 3D View';
+                } else {
+                    landmarkSection.classList.add('hidden');
+                    toggleLandmarksBtn.textContent = 'Show 3D View';
+                }
+            });
+
+            // Start recording
+            startRecordingBtn.addEventListener('click', () => {
+                // Initialize recording
+                isRecording = true;
+                startTime = Date.now();
+                angleData = [];
+                timeData = [];
+                
+                updateStatus('Recording started', 'info');
+                
+                // Initialize chart if not already done
+                if (!chart) {
+                    initChart();
+                } else {
+                    chart.data.labels = [];
+                    chart.data.datasets[0].data = [];
+                    chart.update();
+                }
+                
+                // Update button states
+                startRecordingBtn.disabled = true;
+                stopRecordingBtn.disabled = false;
+                downloadRecordingBtn.disabled = true;
+                
+                // Start media recording if supported
+                try {
+                    if (MediaRecorder && MediaRecorder.isTypeSupported('video/webm')) {
+                        recordedChunks = [];
+                        const stream = outputCanvas.captureStream(30);
+                        mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                        
+                        mediaRecorder.ondataavailable = (e) => {
+                            if (e.data.size > 0) {
+                                recordedChunks.push(e.data);
+                            }
+                        };
+                        
+                        mediaRecorder.start();
+                    } else {
+                        console.warn('MediaRecorder or video/webm not supported');
+                        updateStatus('Recording video not supported in this browser', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error starting recording:', error);
+                    updateStatus('Error starting recording: ' + error.message, 'error');
+                }
+            });
+
+            // Stop recording
+            stopRecordingBtn.addEventListener('click', () => {
+                stopRecording();
+            });
+
+            function stopRecording() {
+                isRecording = false;
+                
+                // Update button states
+                startRecordingBtn.disabled = false;
+                stopRecordingBtn.disabled = true;
+                downloadRecordingBtn.disabled = false;
+                
+                updateStatus('Recording stopped', 'info');
+                
+                // Stop media recording if active
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
+            }
+
+            // Download recording
+            downloadRecordingBtn.addEventListener('click', () => {
+                if (recordedChunks.length === 0) {
+                    alert('No recording available to download.');
+                    return;
+                }
+                
+                try {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `pose_recording_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.webm`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    updateStatus('Recording downloaded', 'success');
+                } catch (error) {
+                    console.error('Error downloading recording:', error);
+                    updateStatus('Error downloading recording: ' + error.message, 'error');
+                }
+            });
+
+            // Clear chart
+            clearChartBtn.addEventListener('click', () => {
+                angleData = [];
+                timeData = [];
+                
+                if (chart) {
+                    chart.data.labels = [];
+                    chart.data.datasets[0].data = [];
+                    chart.update();
+                }
+                
+                updateStatus('Chart cleared', 'info');
+            });
+
+            // Download data
+            downloadDataBtn.addEventListener('click', () => {
+                if (angleData.length === 0) {
+                    alert('No data available to download.');
+                    return;
+                }
+                
+                try {
+                    let csvContent = 'data:text/csv;charset=utf-8,Time (s),Angle (degrees)\n';
+                    
+                    for (let i = 0; i < angleData.length; i++) {
+                        csvContent += `${timeData[i]},${angleData[i]}\n`;
+                    }
+                    
+                    const encodedUri = encodeURI(csvContent);
+                    const a = document.createElement('a');
+                    a.href = encodedUri;
+                    a.download = `pose_data_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    
+                    updateStatus('Data downloaded', 'success');
+                } catch (error) {
+                    console.error('Error downloading data:', error);
+                    updateStatus('Error downloading data: ' + error.message, 'error');
+                }
+            });
+
+            // Initialize chart
+            initChart();
+            
+            // Add event listener for exercise selection
+            exerciseSelect.addEventListener('change', () => {
+                const exerciseName = exerciseSelect.options[exerciseSelect.selectedIndex].text;
+                updateStatus(`Selected exercise: ${exerciseName}`, 'info');
+            });
+        });
+    </script>
+</body>
+</html>
