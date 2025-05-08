@@ -2,14 +2,22 @@
   "version": 2,
   "builds": [
     {
-      "src": "fixed_demo.html",
+      "src": "pose-analyzer-v2.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "pose-analyzer-v2.js",
       "use": "@vercel/static"
     }
   ],
   "routes": [
     {
+      "src": "/",
+      "dest": "/pose-analyzer-v2.html"
+    },
+    {
       "src": "/(.*)",
-      "dest": "/fixed_demo.html"
+      "dest": "/$1"
     }
   ]
 }
