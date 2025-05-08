@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Body Pose Analyzer Pro</title>
-    
+    <title>AI Body Pose Analyzer | Professional Exercise Tracking</title>
+
     <!-- MediaPipe libraries -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
-    
+
     <!-- TensorFlow.js for OpenPose -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet@2.2.2/dist/posenet.min.js"></script>
-    
+
     <!-- Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Toastify for notifications -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    
+
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
             --primary-color: #6200ea;
@@ -38,21 +38,21 @@
             --sidebar-width: 300px;
             --header-height: 60px;
             --footer-height: 60px;
-            
+
             /* Light theme variables */
             --background-light: #f5f5f5;
             --surface-light: #ffffff;
             --on-surface-light: #121212;
             --border-light: rgba(0, 0, 0, 0.1);
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
             background-color: var(--background-dark);
             color: var(--on-surface-dark);
@@ -61,35 +61,35 @@
             flex-direction: column;
             transition: background-color 0.3s, color 0.3s;
         }
-        
+
         body.light-theme {
             background-color: var(--background-light);
             color: var(--on-surface-light);
         }
-        
+
         body.light-theme .sidebar,
         body.light-theme header,
         body.light-theme footer {
             background-color: var(--surface-light);
             border-color: var(--border-light);
         }
-        
+
         body.light-theme .stats-card {
             background-color: rgba(240, 240, 240, 0.8);
         }
-        
+
         body.light-theme select {
             background-color: #f0f0f0;
             color: #333;
             border-color: #ddd;
         }
-        
+
         .app-container {
             display: flex;
             flex: 1;
             height: calc(100vh - var(--header-height) - var(--footer-height));
         }
-        
+
         header {
             height: var(--header-height);
             background-color: var(--surface-dark);
@@ -100,13 +100,43 @@
             z-index: 10;
             transition: background-color 0.3s;
         }
-        
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            color: var(--secondary-color);
+            margin-right: 12px;
+            background-color: rgba(3, 218, 198, 0.1);
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(3, 218, 198, 0.3);
+        }
+
+        .title-container {
+            display: flex;
+            flex-direction: column;
+        }
+
         header h1 {
             color: var(--secondary-color);
             font-size: 1.5rem;
-            flex: 1;
+            margin: 0;
+            line-height: 1.2;
+            letter-spacing: 0.5px;
         }
-        
+
+        .subtitle {
+            color: #a0a0a0;
+            font-size: 0.85rem;
+            margin-top: 2px;
+            font-weight: 400;
+        }
+
         .theme-toggle {
             background: none;
             border: none;
@@ -117,19 +147,19 @@
             border-radius: 50%;
             transition: background-color 0.2s;
         }
-        
+
         .theme-toggle:hover {
             background-color: rgba(255, 255, 255, 0.1);
         }
-        
+
         body.light-theme .theme-toggle {
             color: var(--on-surface-light);
         }
-        
+
         body.light-theme .theme-toggle:hover {
             background-color: rgba(0, 0, 0, 0.1);
         }
-        
+
         .sidebar {
             width: var(--sidebar-width);
             background-color: var(--surface-dark);
@@ -137,23 +167,23 @@
             overflow-y: auto;
             transition: transform 0.3s ease, background-color 0.3s;
         }
-        
+
         .sidebar-left {
             border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .sidebar-right {
             border-left: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         body.light-theme .sidebar-left {
             border-right: 1px solid var(--border-light);
         }
-        
+
         body.light-theme .sidebar-right {
             border-left: 1px solid var(--border-light);
         }
-        
+
         .main-content {
             flex: 1;
             padding: 20px;
@@ -163,7 +193,7 @@
             justify-content: center;
             position: relative;
         }
-        
+
         .video-container {
             position: relative;
             width: 100%;
@@ -175,7 +205,7 @@
             overflow: hidden;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         }
-        
+
         #webcam, #output-canvas {
             position: absolute;
             top: 0;
@@ -184,15 +214,15 @@
             height: 100%;
             object-fit: cover;
         }
-        
+
         #output-canvas {
             z-index: 2;
         }
-        
+
         .control-group {
             margin-bottom: 24px;
         }
-        
+
         .control-group h3 {
             margin-bottom: 12px;
             color: var(--secondary-color);
@@ -200,11 +230,11 @@
             display: flex;
             align-items: center;
         }
-        
+
         .control-group h3 i {
             margin-right: 8px;
         }
-        
+
         button {
             background-color: var(--primary-color);
             color: white;
@@ -220,26 +250,26 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         button i {
             margin-right: 8px;
         }
-        
+
         button:hover {
             background-color: #7c4dff;
             transform: translateY(-2px);
         }
-        
+
         button:active {
             transform: translateY(0);
         }
-        
+
         button:disabled {
             background-color: #666;
             cursor: not-allowed;
             transform: none;
         }
-        
+
         select {
             width: 100%;
             padding: 10px 12px;
@@ -256,16 +286,16 @@
             background-size: 12px auto;
             transition: border-color 0.2s;
         }
-        
+
         select:focus {
             border-color: var(--secondary-color);
             outline: none;
         }
-        
+
         body.light-theme select {
             background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
         }
-        
+
         .exercise-category {
             margin-bottom: 8px;
             font-weight: bold;
@@ -273,11 +303,11 @@
             padding-top: 8px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         body.light-theme .exercise-category {
             border-top-color: var(--border-light);
         }
-        
+
         .stats-card {
             background-color: rgba(30, 30, 30, 0.8);
             border-radius: 8px;
@@ -286,28 +316,28 @@
             border-left: 3px solid var(--secondary-color);
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        
+
         .stats-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-        
+
         .stats-card h4 {
             margin-bottom: 10px;
             color: var(--secondary-color);
             display: flex;
             align-items: center;
         }
-        
+
         .stats-card h4 i {
             margin-right: 8px;
         }
-        
+
         .stats-value {
             font-size: 1.5rem;
             font-weight: bold;
         }
-        
+
         .chart-container {
             width: 100%;
             height: 200px;
@@ -317,11 +347,11 @@
             padding: 12px;
             transition: background-color 0.3s;
         }
-        
+
         body.light-theme .chart-container {
             background-color: rgba(240, 240, 240, 0.4);
         }
-        
+
         footer {
             height: var(--footer-height);
             background-color: var(--surface-dark);
@@ -332,11 +362,11 @@
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             transition: background-color 0.3s;
         }
-        
+
         body.light-theme footer {
             border-top: 1px solid var(--border-light);
         }
-        
+
         .log-container {
             flex: 1;
             overflow: hidden;
@@ -345,7 +375,7 @@
             margin-right: 20px;
             font-size: 0.9rem;
         }
-        
+
         .download-btn {
             background-color: var(--secondary-color);
             color: black;
@@ -355,11 +385,11 @@
             justify-content: center;
             width: auto;
         }
-        
+
         .download-btn:hover {
             background-color: #04f7e0;
         }
-        
+
         .alert {
             padding: 12px 16px;
             border-radius: 6px;
@@ -370,66 +400,75 @@
             max-width: 800px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        
+
         .alert i {
             margin-right: 10px;
             font-size: 1.2rem;
         }
-        
+
         .alert-error {
             background-color: rgba(207, 102, 121, 0.2);
             border-left: 3px solid var(--error-color);
         }
-        
+
         .alert-success {
             background-color: rgba(3, 218, 198, 0.2);
             border-left: 3px solid var(--success-color);
         }
-        
+
         .alert-warning {
             background-color: rgba(255, 171, 64, 0.2);
             border-left: 3px solid var(--warning-color);
         }
-        
+
         /* Mobile responsiveness */
         @media (max-width: 768px) {
             .app-container {
                 flex-direction: column;
             }
-            
+
             .sidebar {
                 width: 100%;
                 max-height: 200px;
             }
-            
+
             .sidebar-left {
                 border-right: none;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
-            
+
             .sidebar-right {
                 border-left: none;
                 border-top: 1px solid rgba(255, 255, 255, 0.1);
             }
-            
+
             body.light-theme .sidebar-left {
                 border-bottom: 1px solid var(--border-light);
                 border-right: none;
             }
-            
+
             body.light-theme .sidebar-right {
                 border-top: 1px solid var(--border-light);
                 border-left: none;
             }
-            
+
             .video-container {
                 padding-bottom: 75%; /* 4:3 aspect ratio for mobile */
             }
-            
+
+            .logo-icon {
+                font-size: 1.5rem;
+                padding: 8px;
+            }
+
             header h1 {
                 font-size: 1.2rem;
             }
-            
+
+            .subtitle {
+                font-size: 0.75rem;
+            }
+
             .download-btn {
                 padding: 8px 12px;
                 font-size: 0.8rem;
@@ -439,10 +478,16 @@
 </head>
 <body>
     <header>
-        <h1><i class="fas fa-running"></i> AI Body Pose Analyzer Pro</h1>
+        <div class="logo-container">
+            <i class="fas fa-running logo-icon"></i>
+            <div class="title-container">
+                <h1>AI Body Pose Analyzer</h1>
+                <p class="subtitle">Professional Exercise Tracking & Analysis</p>
+            </div>
+        </div>
         <button class="theme-toggle" id="theme-toggle"><i class="fas fa-moon"></i></button>
     </header>
-    
+
     <div class="app-container">
         <!-- Left Sidebar -->
         <div class="sidebar sidebar-left">
@@ -451,7 +496,7 @@
                 <button id="start-camera"><i class="fas fa-play"></i> Start Camera</button>
                 <button id="stop-camera" disabled><i class="fas fa-stop"></i> Stop Camera</button>
             </div>
-            
+
             <div class="control-group">
                 <h3><i class="fas fa-cog"></i> Tracking Settings</h3>
                 <select id="tracking-mode">
@@ -459,7 +504,7 @@
                     <option value="openpose">OpenPose (PoseNet)</option>
                     <option value="hybrid">Hybrid (Both)</option>
                 </select>
-                
+
                 <select id="analysis-type">
                     <option value="posture">Posture Analysis</option>
                     <option value="fitness">Fitness Tracking</option>
@@ -469,7 +514,7 @@
                     <option value="custom">Custom Analysis</option>
                 </select>
             </div>
-            
+
             <div class="control-group">
                 <h3><i class="fas fa-dumbbell"></i> Exercise Selection</h3>
                 <select id="exercise-category">
@@ -481,26 +526,26 @@
                     <option value="yoga">Yoga</option>
                     <option value="rehab">Rehabilitation</option>
                 </select>
-                
+
                 <select id="exercise-type" size="8" style="height: 200px; overflow-y: auto;">
                     <!-- Exercise options will be populated by JavaScript -->
                 </select>
             </div>
         </div>
-        
+
         <!-- Main Content -->
         <div class="main-content">
             <div class="video-container">
                 <video id="webcam" autoplay playsinline></video>
                 <canvas id="output-canvas"></canvas>
             </div>
-            
+
             <div id="status-message" class="alert alert-success" style="display: none;">
                 <i class="fas fa-info-circle"></i>
                 <span>Ready to start tracking</span>
             </div>
         </div>
-        
+
         <!-- Right Sidebar -->
         <div class="sidebar sidebar-right">
             <div class="control-group">
@@ -509,41 +554,41 @@
                     <h4><i class="fas fa-user"></i> Shoulder Angle</h4>
                     <div class="stats-value" id="shoulder-angle">0°</div>
                 </div>
-                
+
                 <div class="stats-card">
                     <h4><i class="fas fa-user"></i> Elbow Angle</h4>
                     <div class="stats-value" id="elbow-angle">0°</div>
                 </div>
-                
+
                 <div class="stats-card">
                     <h4><i class="fas fa-user"></i> Knee Angle</h4>
                     <div class="stats-value" id="knee-angle">0°</div>
                 </div>
-                
+
                 <div class="stats-card">
                     <h4><i class="fas fa-user"></i> Hip Angle</h4>
                     <div class="stats-value" id="hip-angle">0°</div>
                 </div>
             </div>
-            
+
             <div class="control-group">
                 <h3><i class="fas fa-chart-line"></i> Exercise Stats</h3>
                 <div class="stats-card">
                     <h4><i class="fas fa-redo"></i> Repetitions</h4>
                     <div class="stats-value" id="rep-count">0</div>
                 </div>
-                
+
                 <div class="stats-card">
                     <h4><i class="fas fa-check-circle"></i> Posture Quality</h4>
                     <div class="stats-value" id="posture-quality">Good</div>
                 </div>
-                
+
                 <div class="stats-card">
                     <h4><i class="fas fa-fire"></i> Calories</h4>
                     <div class="stats-value" id="calories">0 kcal</div>
                 </div>
             </div>
-            
+
             <div class="control-group">
                 <h3><i class="fas fa-chart-bar"></i> Angle Tracking</h3>
                 <div class="chart-container">
@@ -552,7 +597,7 @@
             </div>
         </div>
     </div>
-    
+
     <footer>
         <div class="log-container" id="log-container">
             <i class="fas fa-info-circle"></i> Ready to start analysis...
@@ -561,7 +606,7 @@
             <i class="fas fa-download"></i> Download CSV
         </button>
     </footer>
-    
+
     <script src="pose-analyzer-v2.js"></script>
 </body>
 </html>
