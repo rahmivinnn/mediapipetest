@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Body Pose Analyzer</title>
+    
+    <!-- MediaPipe libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+    
+    <!-- TensorFlow.js for OpenPose -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet@2.2.2/dist/posenet.min.js"></script>
+    
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Toastify for notifications -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #6200ea;
+            --secondary-color: #03dac6;
+            --background-dark: #121212;
+            --surface-dark: #1e1e1e;
+            --on-surface-dark: #e0e0e0;
+            --error-color: #cf6679;
+            --success-color: #03dac6;
+            --warning-color: #ffab40;
+            --sidebar-width: 280px;
+            --header-height: 60px;
+            --footer-height: 60px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background-dark);
+            color: var(--on-surface-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .app-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - var(--header-height) - var(--footer-height));
+        }
+        
+        header {
+            height: var(--header-height);
+            background-color: var(--surface-dark);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+        
+        header h1 {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            flex: 1;
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--on-surface-dark);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--surface-dark);
+            padding: 20px;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-left {
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-right {
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        #webcam, #output-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        #output-canvas {
+            z-index: 2;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-group h3 {
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #7c4dff;
+        }
+        
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        
+        select {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 4px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+            margin-bottom: 10px;
+        }
+        
+        .stats-card {
+            background-color: rgba(30, 30, 30, 0.8);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--secondary-color);
+        }
+        
+        .stats-card h4 {
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+        
+        .stats-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 15px;
+        }
+        
+        footer {
+            height: var(--footer-height);
+            background-color: var(--surface-dark);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .log-container {
+            flex: 1;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            margin-right: 20px;
+        }
+        
+        .download-btn {
+            background-color: var(--secondary-color);
+            color: black;
+        }
+        
+        .download-btn:hover {
+            background-color: #04f7e0;
+        }
+        
+        .alert {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .alert-error {
+            background-color: rgba(207, 102, 121, 0.2);
+            border-left: 3px solid var(--error-color);
+        }
+        
+        .alert-success {
+            background-color: rgba(3, 218, 198, 0.2);
+            border-left: 3px solid var(--success-color);
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: 200px;
+            }
+            
+            .sidebar-left {
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .sidebar-right {
+                border-left: none;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .video-container {
+                padding-bottom: 75%; /* 4:3 aspect ratio for mobile */
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AI Body Pose Analyzer</h1>
+        <button class="theme-toggle" id="theme-toggle">🌙</button>
+    </header>
+    
+    <div class="app-container">
+        <!-- Left Sidebar -->
+        <div class="sidebar sidebar-left">
+            <div class="control-group">
+                <h3>Camera Controls</h3>
+                <button id="start-camera">Start Camera</button>
+                <button id="stop-camera" disabled>Stop Camera</button>
+            </div>
+            
+            <div class="control-group">
+                <h3>Tracking Mode</h3>
+                <select id="tracking-mode">
+                    <option value="mediapipe">MediaPipe</option>
+                    <option value="openpose">OpenPose (PoseNet)</option>
+                    <option value="hybrid">Hybrid (Both)</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <h3>Analysis Type</h3>
+                <select id="analysis-type">
+                    <option value="posture">Posture Analysis</option>
+                    <option value="fitness">Fitness Tracking</option>
+                    <option value="dance">Dance Movement</option>
+                    <option value="custom">Custom Analysis</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <h3>Exercise Type</h3>
+                <select id="exercise-type">
+                    <option value="none">None</option>
+                    <option value="squat">Squat</option>
+                    <option value="pushup">Push Up</option>
+                    <option value="shoulderpress">Shoulder Press</option>
+                    <option value="lunges">Lunges</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="video-container">
+                <video id="webcam" autoplay playsinline></video>
+                <canvas id="output-canvas"></canvas>
+            </div>
+            
+            <div id="status-message" class="alert alert-success" style="margin-top: 20px; display: none;">
+                Ready to start tracking
+            </div>
+        </div>
+        
+        <!-- Right Sidebar -->
+        <div class="sidebar sidebar-right">
+            <div class="control-group">
+                <h3>Body Angles</h3>
+                <div class="stats-card">
+                    <h4>Shoulder Angle</h4>
+                    <div class="stats-value" id="shoulder-angle">0°</div>
+                </div>
+                
+                <div class="stats-card">
+                    <h4>Elbow Angle</h4>
+                    <div class="stats-value" id="elbow-angle">0°</div>
+                </div>
+                
+                <div class="stats-card">
+                    <h4>Knee Angle</h4>
+                    <div class="stats-value" id="knee-angle">0°</div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>Exercise Stats</h3>
+                <div class="stats-card">
+                    <h4>Repetitions</h4>
+                    <div class="stats-value" id="rep-count">0</div>
+                </div>
+                
+                <div class="stats-card">
+                    <h4>Posture Quality</h4>
+                    <div class="stats-value" id="posture-quality">Good</div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>Angle Tracking</h3>
+                <div class="chart-container">
+                    <canvas id="angle-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="log-container" id="log-container">
+            Ready to start analysis...
+        </div>
+        <button class="download-btn" id="download-csv">Download CSV</button>
+    </footer>
+    
+    <script src="pose-analyzer.js"></script>
+</body>
+</html>
